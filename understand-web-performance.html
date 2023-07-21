@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FCP</title>
+    <style>
+        p:nth-of-type(2n) {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Voluptatibus, perspiciatis ipsa amet tenetur qui repellat animi laboriosam impedit eius fugit ipsum suscipit? Quasi eius aperiam cupiditate eveniet ex dolore molestiae!</p>
+    <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Voluptatibus, perspiciatis ipsa amet tenetur qui repellat animi laboriosam impedit eius fugit ipsum suscipit? Quasi eius aperiam cupiditate eveniet ex dolore molestiae!</p>
+    <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Voluptatibus, perspiciatis ipsa amet tenetur qui repellat animi laboriosam impedit eius fugit ipsum suscipit? Quasi eius aperiam cupiditate eveniet ex dolore molestiae!</p>
+    <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Voluptatibus, perspiciatis ipsa amet tenetur qui repellat animi laboriosam impedit eius fugit ipsum suscipit? Quasi eius aperiam cupiditate eveniet ex dolore molestiae!</p>
+    <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Voluptatibus, perspiciatis ipsa amet tenetur qui repellat animi laboriosam impedit eius fugit ipsum suscipit? Quasi eius aperiam cupiditate eveniet ex dolore molestiae!</p>
+    <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Voluptatibus, perspiciatis ipsa amet tenetur qui repellat animi laboriosam impedit eius fugit ipsum suscipit? Quasi eius aperiam cupiditate eveniet ex dolore molestiae!</p>
+    <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Voluptatibus, perspiciatis ipsa amet tenetur qui repellat animi laboriosam impedit eius fugit ipsum suscipit? Quasi eius aperiam cupiditate eveniet ex dolore molestiae!</p>
+    <script>
+        function render() {
+            hardWork();
+            loadComponents();
+        }
+        function hardWork() {
+            var cursor = 0;
+            for (var i = 0; i < 99999999; i++) {
+                cursor++;
+            }
+
+            console.log(cursor);
+        }
+        function lazy(work) {
+            setTimeout(() => {
+                work();
+            }, 30); // 30ms 기준: 1차 레이아웃이 끝나는 기점
+        }
+        function loadComponents() {
+            var html = '<img src="./cat.jpeg" width="300">';
+
+            for (var i = 0; i < 100; i++) {
+                html += '<p>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Voluptatibus, perspiciatis ipsa amet tenetur qui repellat animi laboriosam impedit eius fugit ipsum suscipit? Quasi eius aperiam cupiditate eveniet ex dolore molestiae!</p>';
+            }
+
+            document.body.insertAdjacentHTML(
+                'beforebegin',
+                html,
+            )
+        }
+    </script>
+
+    <!-- 1. script evaluation은 FCP에 영향을 준다 -->
+    <!-- 성능의 Evaluate Script는 JIT 컴파일러가 정적컴파일 동작과 동적컴파일(인터프리터) 동작을 모두 합친 동작을 의미한다 -->
+    <!-- <script>
+        render();
+    </script> -->
+    <!-- /1 -->
+
+    <!-- 2. async는 FCP, LCP에 영향을 주지 않을수도 줄수도 있고, defer 는 FCP에 영향을 줄 가능성이 크다 -->
+    <!-- async: background fetch 후 바로 evaluation (순서 무상관) -->
+    <!-- defer: background fetch 후 dcl 이전에 evaluation (순서 상관있음) -->
+    <!-- <script async>
+        render();
+    </script>
+    <script>
+        console.log('Not called before hardwork')
+    </script> -->
+    <!-- /2 -->
+
+    <!-- 3. layout 끝나는 시점 뒤로 작업을 미루면 fcp 를 당길 수 있다. -->
+    <!-- 타이머를 사용하면 그때 그때 다를 수 있다 (Layout 프로세스가 커지면 FCP를 블록할수도 있음) -->
+    <!-- <script>
+        setTimeout(() => {
+            work();
+        }, 30); // 30ms 기준: 1차 레이아웃이 끝나는 기점
+    </script> -->
+    <!-- /3 -->
+
+    <!-- 4. requestIdleCallback을 이용해서 레이아웃이 확실히 끝날때 실행함으로써 fcp 에 영향을 주지 않는다. -->
+    <!-- next.js <Script> 참고 -->
+    <!-- https://github.com/vercel/next.js/blob/canary/packages/next/src/client/script.tsx#L176-L180 -->
+    <script>
+        window.addEventListener('load', () => {
+            requestIdleCallback(() => render());
+        })
+    </script>
+    <!-- /4 -->
+</body>
+</html>
